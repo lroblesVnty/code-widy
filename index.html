@@ -1,25 +1,180 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Widy</title>
   <style>
-    body {
-      background-color: black;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+    :root {
+      --bg: #0b0b0b;
+      --panel: #111316;
+      --text: #00ff7f; /* verde neón suave */
+      --dim: #72ffb7;
+      --accent: #00ffaa;
     }
-    img {
-      border: 2px solid #00FF00;
-      box-shadow: 0 0 20px #00FF00;
-      max-width: 90%;
-      height: auto;
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+    .wrap { min-height: 100%; display: grid; place-items: center; padding: 24px; }
+    .terminal {
+      width: min(900px, 95vw);
+      background: linear-gradient(180deg, #0f1215, var(--panel));
+      border: 1px solid #1a1f24;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 255, 170, 0.12), inset 0 0 30px rgba(0, 255, 170, 0.04);
+      overflow: hidden;
+    }
+    .titlebar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; background: #0c0f12; border-bottom: 1px solid #151a1f;
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot.red { background: #ff5f57; }
+    .dot.yellow { background: #ffbd2e; }
+    .dot.green { background: #28c840; }
+    .title { margin-left: 8px; color: #8ea3b0; font-size: 12px; letter-spacing: 0.08em; }
+    .screen { padding: 18px 18px 24px; }
+    .line { white-space: pre-wrap; word-break: break-word; line-height: 1.6; }
+    .prompt { color: var(--dim); }
+    .cursor {
+      display: inline-block; width: 10px; margin-left: 4px;
+      border-left: 10px solid var(--text);
+      animation: blink 1s steps(1) infinite;
+    }
+    @keyframes blink { 50% { border-color: transparent; } }
+    .input-row { display: flex; align-items: center; margin-top: 10px; }
+    .caret { color: var(--accent); margin-right: 8px; }
+    input[type="text"] {
+      flex: 1; background: transparent; border: none; outline: none;
+      color: var(--text); font: inherit; padding: 6px 0;
+    }
+    .help { color: #7fd; opacity: 0.7; font-size: 12px; margin-top: 8px; }
+    .hr { height: 1px; background: #142023; margin: 10px 0 14px; border: none; }
+    .btns { display: flex; gap: 10px; margin-top: 14px; }
+    button {
+      background: #0b1517; color: var(--text); border: 1px solid #153439;
+      border-radius: 8px; padding: 8px 12px; font: inherit; cursor: pointer;
+      transition: transform 0.05s ease, box-shadow 0.2s ease, border 0.2s ease;
+    }
+    button:hover { box-shadow: 0 0 16px rgba(0, 255, 170, 0.18); border-color: #1b555e; }
+    button:active { transform: translateY(1px) scale(0.995); }
+    .footer {
+      color: #84fbd2; opacity: 0.7; font-size: 12px; padding: 0 18px 18px;
+    }
+    /* responsivo */
+    @media (max-width: 420px) {
+      .title { display: none; }
     }
   </style>
 </head>
 <body>
-  <img src="wd.jpg" alt="Código romántico">
+  <div class="wrap">
+    <div class="terminal" role="region" aria-label="Terminal romántica">
+      <div class="titlebar">
+        <span class="dot red" aria-hidden="true"></span>
+        <span class="dot yellow" aria-hidden="true"></span>
+        <span class="dot green" aria-hidden="true"></span>
+        <span class="title">Terminal — code-widy</span>
+      </div>
+
+      <div class="screen" id="screen">
+        <div class="line prompt" id="typing"></div>
+        <div class="hr"></div>
+
+        <div class="line">Escribe tu respuesta y presiona Enter:</div>
+        <div class="input-row">
+          <span class="caret">››</span>
+          <input id="input" type="text" autocomplete="off" placeholder="sí / no" aria-label="Entrada de respuesta" />
+        </div>
+        <div class="help">Acepta “sí”, “si”, “yes” o “no”.</div>
+
+        <div class="btns">
+          <button id="btnYes" type="button">Responder “sí”</button>
+          <button id="btnNo" type="button">Responder “no”</button>
+          <button id="btnReset" type="button">Reiniciar</button>
+        </div>
+      </div>
+
+      <div class="footer">print("¿Quieres ser el ; que le hace falta a mi código?")</div>
+    </div>
+  </div>
+
+  <script>
+    const phrase = "¿Quieres ser el ; que le hace falta a mi código?";
+    const typingEl = document.getElementById("typing");
+    const inputEl = document.getElementById("input");
+    const btnYes = document.getElementById("btnYes");
+    const btnNo = document.getElementById("btnNo");
+    const btnReset = document.getElementById("btnReset");
+    const screen = document.getElementById("screen");
+
+    // Efecto de tipeo estilo terminal
+    function typeLine(text, speed = 25) {
+      typingEl.textContent = "";
+      return new Promise(resolve => {
+        let i = 0;
+        const cursor = document.createElement("span");
+        cursor.className = "cursor";
+        typingEl.appendChild(cursor);
+
+        const interval = setInterval(() => {
+          cursor.remove();
+          typingEl.textContent += text[i] ?? "";
+          typingEl.appendChild(cursor);
+          i++;
+          if (i > text.length) {
+            clearInterval(interval);
+            resolve();
+          }
+        }, speed);
+      });
+    }
+
+    // Añade una línea de respuesta
+    function addResponse(text) {
+      const line = document.createElement("div");
+      line.className = "line";
+      line.textContent = text;
+      screen.appendChild(line);
+    }
+
+    // Normaliza la respuesta
+    function normalize(v) {
+      return (v || "").trim().toLowerCase();
+    }
+
+    // Lógica de respuestas
+    function reply(value) {
+      const v = normalize(value);
+      if (["sí", "si", "yes", "y"].includes(v)) {
+        addResponse("Entonces compilemos algo juntos 💻❤️");
+      } else if (["no", "n"].includes(v)) {
+        addResponse("Entiendo, seguiré debuggeando mi corazón…");
+      } else if (v.length === 0) {
+        addResponse("Silencio en la consola… ¿Intentas de nuevo?");
+      } else {
+        addResponse(`Entrada no reconocida: "${value}". Prueba con "sí" o "no".`);
+      }
+    }
+
+    // Eventos
+    inputEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        reply(inputEl.value);
+        inputEl.value = "";
+      }
+    });
+    btnYes.addEventListener("click", () => reply("sí"));
+    btnNo.addEventListener("click", () => reply("no"));
+    btnReset.addEventListener("click", () => {
+      // Limpia líneas extra manteniendo el prompt y controles
+      const children = Array.from(screen.querySelectorAll(".line")).slice(1); // deja la línea de prompt
+      children.forEach(el => el.remove());
+    });
+
+    // Inicio: escribe la frase con efecto
+    (async function init() {
+      await typeLine(`print("${phrase}")`);
+    })();
+  </script>
 </body>
 </html>
