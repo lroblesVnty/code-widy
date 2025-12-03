@@ -49,7 +49,7 @@
     }
     .help { color: #7fd; opacity: 0.7; font-size: 12px; margin-top: 8px; }
     .hr { height: 1px; background: #142023; margin: 10px 0 14px; border: none; }
-    .btns { display: flex; gap: 10px; margin-top: 14px; }
+    .btns { display: flex; gap: 10px; margin-top: 14px; margin-bottom: 20px; }
     button {
       background: #0b1517; color: var(--text); border: 1px solid #153439;
       border-radius: 8px; padding: 8px 12px; font: inherit; cursor: pointer;
@@ -60,6 +60,18 @@
     .footer {
       color: #84fbd2; opacity: 0.7; font-size: 12px; padding: 0 18px 18px;
     }
+
+    .response-yes {
+      color: #1d41a4; /* azul rey */
+      font-weight: bold;
+    }
+
+    .response-no {
+      color: #FF4C4C; /* rojo que combina con el estilo terminal */
+      font-weight: bold;
+    }
+
+
     /* responsivo */
     @media (max-width: 420px) {
       .title { display: none; }
@@ -85,16 +97,17 @@
           <span class="caret">››</span>
           <input id="input" type="text" autocomplete="off" placeholder="sí / no" aria-label="Entrada de respuesta" />
         </div>
-        <div class="help">Acepta “sí”, “si”, “yes” o “no”.</div>
+        <!-- <div class="help">Acepta “sí”, “si”, “yes” o “no”.</div> -->
 
         <div class="btns">
-          <button id="btnYes" type="button">Responder “sí”</button>
-          <button id="btnNo" type="button">Responder “no”</button>
-          <button id="btnReset" type="button">Reiniciar</button>
+          <button id="btnYes" type="button">Sí</button>
+          <button id="btnNo" type="button">No</button>
+          <!-- <button id="btnReset" type="button">Reiniciar</button> -->
         </div>
       </div>
 
-      <div class="footer">print("¿Quieres ser el ; que le hace falta a mi código?")</div>
+      <!-- <div class="footer">print("¿Quieres ser el ; que le hace falta a mi código?")</div> -->
+      <div class="footer" id="footer" style="display:none">// End of script — pero inicio de nosotros</div>
     </div>
   </div>
 
@@ -104,7 +117,7 @@
     const inputEl = document.getElementById("input");
     const btnYes = document.getElementById("btnYes");
     const btnNo = document.getElementById("btnNo");
-    const btnReset = document.getElementById("btnReset");
+    // const btnReset = document.getElementById("btnReset");
     const screen = document.getElementById("screen");
 
     // Efecto de tipeo estilo terminal
@@ -130,9 +143,9 @@
     }
 
     // Añade una línea de respuesta
-    function addResponse(text) {
+    function addResponse(text,cssClass = "") {
       const line = document.createElement("div");
-      line.className = "line";
+      line.className = "line " + cssClass;
       line.textContent = text;
       screen.appendChild(line);
     }
@@ -146,9 +159,11 @@
     function reply(value) {
       const v = normalize(value);
       if (["sí", "si", "yes", "y"].includes(v)) {
-        addResponse("Entonces compilemos algo juntos 💻❤️");
+        addResponse("Entonces compilemos algo juntos 💻❤️", "response-yes");
+        document.getElementById("footer").style.display = "block";
       } else if (["no", "n"].includes(v)) {
-        addResponse("Entiendo, seguiré debuggeando mi corazón…");
+        addResponse("Compilación fallida: faltan dependencias de cariño 💔", "response-no");
+        document.getElementById("footer").style.display = "none";
       } else if (v.length === 0) {
         addResponse("Silencio en la consola… ¿Intentas de nuevo?");
       } else {
@@ -165,15 +180,16 @@
     });
     btnYes.addEventListener("click", () => reply("sí"));
     btnNo.addEventListener("click", () => reply("no"));
-    btnReset.addEventListener("click", () => {
+   /* btnReset.addEventListener("click", () => {
       // Limpia líneas extra manteniendo el prompt y controles
       const children = Array.from(screen.querySelectorAll(".line")).slice(1); // deja la línea de prompt
       children.forEach(el => el.remove());
-    });
+    });*/
 
     // Inicio: escribe la frase con efecto
     (async function init() {
-      await typeLine(`print("${phrase}")`);
+      //await typeLine(`print("${phrase}")`);
+      await typeLine(phrase);
     })();
   </script>
 </body>
