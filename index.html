@@ -14,7 +14,7 @@
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
-    .wrap { min-height: 100%; display: grid; place-items: center; padding: 24px; }
+    .wrap { min-height: 100%; display: grid; place-items: center; padding: 10px; }
     .terminal {
       width: min(900px, 95vw);
       background: linear-gradient(180deg, #0f1215, var(--panel));
@@ -71,11 +71,30 @@
       font-weight: bold;
     }
 
+   /* Ajustes para pantallas pequeñas */
+    @media (max-width: 600px) {
+      .terminal {
+        width: 95vw;       /* ocupa casi todo el ancho */
+        border-radius: 8px;
+      }
 
-    /* responsivo */
-    @media (max-width: 420px) {
-      .title { display: none; }
+     
+
+      .line {
+        font-size: 14px;   /* texto más pequeño */
+        line-height: 1.4;
+      }
+
+      
+
+      .footer {
+        font-size: 11px;   /* footer más compacto */
+        text-align: center;
+      }
     }
+
+
+    
   </style>
 </head>
 <body>
